@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.7.0
+  sdk: ^3.7.2
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -32,10 +32,11 @@ dependencies:
     sdk: flutter
   camera: ^0.10.5+3       # For live camera feed
   image_picker: ^1.0.4    # For picking images from gallery
-  # tflite_flutter: ^0.10.0 # For TensorFlow Lite inference
-  # tflite_flutter_helper: ^0.5.0 # For image preprocessing
-  # flutter_svg: ^2.0.7     # For SVG icons (optional)
   google_fonts: ^4.0.4 
+  tflite_flutter: ^0.11.0
+  image: ^3.3.0
+  permission_handler: ^11.3.1
+  path_provider: ^2.1.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -66,6 +67,9 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
       - assets/images/HowPine Logo.png
+      - assets/models/EfficientNet.tflite
+      - assets/models/mobileNet.tflite
+      - assets/models/mobileNet2.tflite
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

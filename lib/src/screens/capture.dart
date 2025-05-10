@@ -99,7 +99,8 @@ Future<void> _takePhoto() async {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+      child: Scaffold(
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -218,6 +219,7 @@ Future<void> _takePhoto() async {
           }
         },
       ),
+    ),
     );
   }
 

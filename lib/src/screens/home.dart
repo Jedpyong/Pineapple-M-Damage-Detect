@@ -61,7 +61,8 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
+    return SafeArea(
+      child: Scaffold(
       appBar: AppBar(
         title: const Text(
           'Pineapple Quality Scanner',
@@ -115,7 +116,7 @@ class _HomeState extends State<Home> {
                   
                   // Subtitle
                   Text(
-                    'Capture or upload an image to analyze pineapple quality',
+                    'Capture or upload an image to predict pineapple quality',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.grey[700],
@@ -200,6 +201,7 @@ class _HomeState extends State<Home> {
             ),
         ],
       ),
+    ),
     );
   }
 
