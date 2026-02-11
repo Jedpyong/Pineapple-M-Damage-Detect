@@ -6,7 +6,7 @@ import 'package:tflite_flutter/tflite_flutter.dart' as tfl;
 
 Future<Map<String, dynamic>> classifyPineapple(File imageFile, String model) async {
   // 1. Load your TFLite model
-  final interpreter = await Interpreter.fromAsset('assets/models/mobileNet2.tflite');
+  final interpreter = await Interpreter.fromAsset('assets/models/EfficientNetB0_02.tflite');
 
   // 2. Read image file
   final rawBytes = await imageFile.readAsBytes();
