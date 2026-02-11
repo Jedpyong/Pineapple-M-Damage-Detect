@@ -12,23 +12,42 @@ Future<Map<String, dynamic>> classifyPineapple(File imageFile, String model) asy
   final rawBytes = await imageFile.readAsBytes();
   img.Image? image = img.decodeImage(rawBytes);
 
+  if (image == null) return {'error': 'Could not decode image'};
+
   // 3. Resize to 224x224
-  img.Image resized = img.copyResize(image!, width: 224, height: 224);
+  img.Image resized = img.copyResize(image, width: 224, height: 224);
 
-  // 4. Normalize and convert to Float32List
-  var input = List.generate(224, (y) =>
-    List.generate(224, (x) {
-      final pixel = resized.getPixel(x, y);
-      return [
-        img.getRed(pixel) / 255.0,
-        img.getGreen(pixel) / 255.0,
-        img.getBlue(pixel) / 255.0,
-      ];
-    }),
-  );
+//For mobilenet or custom
+  // // 4. Normalize and convert to Float32List
+  // var input = List.generate(224, (y) =>
+  //   List.generate(224, (x) {
+  //     final pixel = resized.getPixel(x, y);
+  //     return [
+  //       img.getRed(pixel) / 255.0,
+  //       img.getGreen(pixel) / 255.0,
+  //       img.getBlue(pixel) / 255.0,
+  //     ];
+  //   }),
+  // );
 
-  // Convert to Tensor input shape: [1, 224, 224, 3]
-  var inputTensor = [input];
+  // // Convert to Tensor input shape: [1, 224, 224, 3]
+  // var inputTensor = [input];
+
+// For EfficientNetB0
+  //Create Input Buffer
+  Float32List inputBytes = Float32List(1 * 224 * 224 * 3);
+
+  int pixelIndex = 0;
+  for (int y = 0; y < resized.height; y++) {
+    for (int x = 0; x < resized.width; x++) {
+      int pixel = resized.getPixel(x, y);
+    inputBytes[pixelIndex++] = img.getRed(pixel).toDouble();
+    inputBytes[pixelIndex++] = img.getGreen(pixel).toDouble();
+    inputBytes[pixelIndex++] = img.getBlue(pixel).toDouble();
+    }
+  }
+
+  var inputTensor = inputBytes.reshape([1, 224, 224, 3]);
 
   // 5. Allocate output buffer
   var output = List.filled(1, 0.0).reshape([1, 1]);
@@ -37,6 +56,7 @@ Future<Map<String, dynamic>> classifyPineapple(File imageFile, String model) asy
   interpreter.run(inputTensor, output);
 
     double score = output[0][0];
+
   String label = score >= 0.5 ? 'Healthy' : 'Mechanically Damaged';
   return {
     'label': label,

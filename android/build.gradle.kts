@@ -19,3 +19,17 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
+
+subprojects {
+    val subproject = this
+    subproject.plugins.whenPluginAdded {
+        if (this is com.android.build.gradle.BasePlugin) {
+            val android = subproject.extensions.getByName("android") as? com.android.build.gradle.BaseExtension
+            android?.let {
+                if (it.namespace == null) {
+                    it.namespace = subproject.group.toString()
+                }
+            }
+        }
+    }
+}
