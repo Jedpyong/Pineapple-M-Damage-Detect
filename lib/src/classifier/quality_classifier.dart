@@ -4,9 +4,11 @@ import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:tflite_flutter/tflite_flutter.dart' as tfl;
 
-Future<Map<String, dynamic>> classifyPineapple(File imageFile, String model) async {
+Future<Map<String, dynamic>> classifyPineapple(File imageFile) async {
   // 1. Load your TFLite model
-  final interpreter = await Interpreter.fromAsset('assets/models/EfficientNetB0_02.tflite');
+  final interpreter = await Interpreter.fromAsset(
+    'assets/models/[Op4]EfficientNetV2B0.tflite',
+  );
 
   // 2. Read image file
   final rawBytes = await imageFile.readAsBytes();
@@ -14,40 +16,44 @@ Future<Map<String, dynamic>> classifyPineapple(File imageFile, String model) asy
 
   if (image == null) return {'error': 'Could not decode image'};
 
-  // 3. Resize to 224x224
-  img.Image resized = img.copyResize(image, width: 224, height: 224);
+  image = img.bakeOrientation(image);
 
-//For mobilenet or custom
-  // // 4. Normalize and convert to Float32List
-  // var input = List.generate(224, (y) =>
-  //   List.generate(224, (x) {
-  //     final pixel = resized.getPixel(x, y);
-  //     return [
-  //       img.getRed(pixel) / 255.0,
-  //       img.getGreen(pixel) / 255.0,
-  //       img.getBlue(pixel) / 255.0,
-  //     ];
-  //   }),
-  // );
+  //Preprocess
+  int cropSize = image.width < image.height ? image.width : image.height;
 
-  // // Convert to Tensor input shape: [1, 224, 224, 3]
-  // var inputTensor = [input];
+  int offsetX = (image.width - cropSize) ~/ 2;
+  int offsetY = (image.height - cropSize) ~/ 2;
 
-// For EfficientNetB0
+  img.Image squareImage = img.copyCrop(
+    image,
+    offsetX,
+    offsetY,
+    cropSize,
+    cropSize,
+  );
+
+  img.Image finalResizedImage = img.copyResize(
+    squareImage,
+    width: 300, //MobileNet
+    height: 300, //MobileNet
+    // width: 512, //EfficientNetV2B0
+    // height: 512, //EfficientNetV2B0
+  );
+
   //Create Input Buffer
-  Float32List inputBytes = Float32List(1 * 224 * 224 * 3);
+  Float32List inputBytes = Float32List(1 * 300 * 300 * 3);
 
   int pixelIndex = 0;
-  for (int y = 0; y < resized.height; y++) {
-    for (int x = 0; x < resized.width; x++) {
-      int pixel = resized.getPixel(x, y);
-    inputBytes[pixelIndex++] = img.getRed(pixel).toDouble();
-    inputBytes[pixelIndex++] = img.getGreen(pixel).toDouble();
-    inputBytes[pixelIndex++] = img.getBlue(pixel).toDouble();
+  for (int y = 0; y < finalResizedImage.height; y++) {
+    for (int x = 0; x < finalResizedImage.width; x++) {
+      int pixel = finalResizedImage.getPixel(x, y);
+      inputBytes[pixelIndex++] = img.getRed(pixel).toDouble();
+      inputBytes[pixelIndex++] = img.getGreen(pixel).toDouble();
+      inputBytes[pixelIndex++] = img.getBlue(pixel).toDouble();
     }
   }
 
-  var inputTensor = inputBytes.reshape([1, 224, 224, 3]);
+  var inputTensor = inputBytes.reshape([1, 300, 300, 3]);
 
   // 5. Allocate output buffer
   var output = List.filled(1, 0.0).reshape([1, 1]);
@@ -55,13 +61,12 @@ Future<Map<String, dynamic>> classifyPineapple(File imageFile, String model) asy
   // 6. Run inference
   interpreter.run(inputTensor, output);
 
-    double score = output[0][0];
+  double score = output[0][0];
 
-  String label = score >= 0.5 ? 'Healthy' : 'Mechanically Damaged';
+  String label = score >= 0.5 ? 'Mechanically Damaged' : 'Healthy';
   return {
     'label': label,
-    'score': score,          // Raw confidence score (0.0 to 1.0)
+    'score': score, // Raw confidence score (0.0 to 1.0)
     'confidence': '${(score * 100).toStringAsFixed(1)}%',
   };
-  // return score.toString();
 }
