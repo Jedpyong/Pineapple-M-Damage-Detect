@@ -82,8 +82,16 @@ flutter:
     # - assets/models/[3]MobileNetV3Small_Pineapple.tflite
     # - assets/models/EfficientNetV2B0_HighRes.tflite
     # - assets/models/EfficientNetV2B0_HighRes2.tflite
-    - assets/models/[Op4]EfficientNetV2B0.tflite
+    # - assets/models/EfficientNetV2B0_HighRes10.tflite
+    # - assets/models/EfficientNetV2B0_HighRes10 (1).tflite
+    # - assets/models/[Op4]EfficientNetV2B0.tflite
+    # - assets/models/[Op6]EfficientNetV2B0.tflite
+    # - assets/models/[Op11]EfficientNetV2B0.tflite
+    - assets/models/[Op12]EfficientNetV2B0.tflite
+    # - assets/models/[Op14]EfficientNetV2B0.tflite
     # - assets/models/[Op4]MobileNetV3Small.tflite
+    # - assets/models/[Op15]MobileNetV3Small.tflite
+    # - assets/models/[Op16]MobileNetV3Small.tflite
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

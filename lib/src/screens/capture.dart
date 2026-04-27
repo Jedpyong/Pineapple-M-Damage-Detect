@@ -1,10 +1,12 @@
 import 'package:camera/camera.dart';
+import 'package:detector/src/classifier/quality_classifier.dart';
 import 'package:flutter/material.dart';
 import 'package:detector/src/screens/result.dart';
 
 class Capture extends StatefulWidget {
   final List<CameraDescription> cameras;
-  const Capture({super.key, required this.cameras});
+  final PineappleClassifier classifier;
+  const Capture({super.key, required this.cameras, required this.classifier});
 
   @override
   State<Capture> createState() => _CaptureState();
@@ -15,8 +17,8 @@ class _CaptureState extends State<Capture> {
   late Future<void> _initializeControllerFuture;
   bool _isFrontCamera = false;
   bool _isCapturing = false;
-  bool _flashOn = true;
-  final _flashActive = true;
+  bool _flashOn = false;
+  final _flashActive = false;
 
   @override
   void initState() {
@@ -36,16 +38,13 @@ class _CaptureState extends State<Capture> {
 
   Future<void> _toggleCamera() async {
     if (widget.cameras.length < 2) return;
-
     setState(() => _isFrontCamera = !_isFrontCamera);
     await _controller.dispose();
     _initializeCamera(_isFrontCamera ? widget.cameras[1] : widget.cameras[0]);
   }
 
   Future<void> _toggleFlash() async {
-    setState(() {
-      _flashOn = !_flashOn;
-    });
+    setState(() => _flashOn = !_flashOn);
   }
 
   Future<void> _takePhoto() async {
@@ -53,7 +52,6 @@ class _CaptureState extends State<Capture> {
     setState(() => _isCapturing = true);
 
     try {
-      // 1. Only turn on flash if user toggled it
       if (_flashOn) {
         await _controller.setFlashMode(FlashMode.torch);
         await Future.delayed(const Duration(milliseconds: 100));
@@ -61,18 +59,18 @@ class _CaptureState extends State<Capture> {
         await _controller.setFlashMode(FlashMode.off);
       }
 
-      // 2. Take the photo
       final XFile photo = await _controller.takePicture();
-
-      // 3. Ensure flash is turned OFF immediately after
       await _controller.setFlashMode(FlashMode.off);
 
       if (!mounted) return;
 
-      // 4. Navigate to result screen
       await Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => Results(imagePath: photo.path)),
+        MaterialPageRoute(
+          builder:
+              (context) =>
+                  Results(imagePath: photo.path, classifier: widget.classifier),
+        ),
       );
     } catch (e) {
       debugPrint("Error capturing photo: $e");
@@ -90,15 +88,35 @@ class _CaptureState extends State<Capture> {
 
   @override
   Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    final screenWidth = mq.size.width;
+    final screenHeight = mq.size.height;
+
+    // Responsive values
+    final captureButtonSize = (screenWidth * 0.175).clamp(60.0, 90.0);
+    final captureButtonBorder = (captureButtonSize * 0.08).clamp(3.0, 5.0);
+    final captureButtonInnerPadding = (captureButtonSize * 0.06).clamp(
+      3.0,
+      6.0,
+    );
+    final instructionFontSize = (screenWidth * 0.04).clamp(13.0, 18.0);
+    final bottomPadding = (screenHeight * 0.05).clamp(24.0, 60.0);
+    final switchIconSize = (screenWidth * 0.07).clamp(24.0, 36.0);
+    final appBarIconSize = (screenWidth * 0.065).clamp(22.0, 32.0);
+
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.black, // Keeps the rest of the screen black
+        backgroundColor: Colors.black,
         extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+              size: appBarIconSize,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
           actions: [
@@ -106,6 +124,7 @@ class _CaptureState extends State<Capture> {
               icon: Icon(
                 _flashOn ? Icons.flash_on : Icons.flash_off,
                 color: _flashActive ? Colors.amber : Colors.white,
+                size: appBarIconSize,
               ),
               onPressed: _toggleFlash,
             ),
@@ -120,52 +139,57 @@ class _CaptureState extends State<Capture> {
                   cameraAspectRatio < 1.0
                       ? 1.0 / cameraAspectRatio
                       : cameraAspectRatio;
+
               return Stack(
                 children: [
-                  // 1:1 Square Camera Preview
+                  // Square camera preview
                   Center(
                     child: AspectRatio(
-                      aspectRatio: 1.0, // Forces a 1:1 square
+                      aspectRatio: 1.0,
                       child: ClipRect(
-                        // Cuts off the parts of the camera feed outside the square
                         child: Transform.scale(
-                          scale:
-                              scale, // Zooms the feed so it covers the square entirely
+                          scale: scale,
                           child: Center(child: CameraPreview(_controller)),
                         ),
                       ),
                     ),
                   ),
 
-                  // Bottom Controls
+                  // Bottom controls
                   Positioned(
-                    bottom: 40,
+                    bottom: bottomPadding,
                     left: 0,
                     right: 0,
                     child: Column(
                       children: [
-                        // Camera Toggle
+                        // Camera switch toggle
                         if (widget.cameras.length > 1)
                           IconButton(
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.cameraswitch,
                               color: Colors.white,
+                              size: switchIconSize,
                             ),
                             onPressed: _toggleCamera,
                           ),
 
-                        // Capture Button
+                        // Capture button
                         GestureDetector(
                           onTap: _takePhoto,
                           child: Container(
-                            width: 70,
-                            height: 70,
+                            width: captureButtonSize,
+                            height: captureButtonSize,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 4),
+                              border: Border.all(
+                                color: Colors.white,
+                                width: captureButtonBorder,
+                              ),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.all(4),
+                              padding: EdgeInsets.all(
+                                captureButtonInnerPadding,
+                              ),
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
@@ -179,14 +203,16 @@ class _CaptureState extends State<Capture> {
                           ),
                         ),
 
-                        // Instruction Text
+                        // Instruction text
                         Padding(
-                          padding: const EdgeInsets.only(top: 20),
+                          padding: EdgeInsets.only(
+                            top: (screenHeight * 0.025).clamp(12.0, 28.0),
+                          ),
                           child: Text(
                             'Center the pineapple in the frame',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
+                              fontSize: instructionFontSize,
                               shadows: [
                                 Shadow(
                                   color: Colors.black.withOpacity(0.8),
