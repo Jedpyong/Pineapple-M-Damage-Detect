@@ -30,7 +30,7 @@ class _ResultsState extends State<Results> with SingleTickerProviderStateMixin {
   late Animation<double> _barAnim;
 
   // ── Design tokens ──────────────────────────────────────────────
-  static const _bg = Color(0xFF0D1A12);
+  static const _bg = Color(0xFF1d3e2a);
   static const _surface = Color(0xFF162119);
   static const _accent = Color.fromARGB(255, 69, 172, 17);
   static const _cream = Color(0xFFF5F0E8);
@@ -455,7 +455,9 @@ class _ConfidenceCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '${(confidence * 100).toStringAsFixed(1)}%',
+                confidence >= 0.5
+                    ? '${(confidence * 100).toStringAsFixed(1)}%'
+                    : '${((1 - confidence) * 100).toStringAsFixed(1)}%',
                 style: TextStyle(
                   color: _barColor,
                   fontSize: 14,
