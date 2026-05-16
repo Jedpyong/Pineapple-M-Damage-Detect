@@ -198,7 +198,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             // Cream background so the light-mode logo looks native
-                            color: const Color(0xFFF5F0E8),
+                            color: const Color(0xFFF0EFDE),
                             border: Border.all(
                               color: _accent.withOpacity(0.35),
                               width: 4,

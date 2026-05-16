@@ -54,10 +54,10 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
 flutter_native_splash:
-  color: "#ffffff"
+  color: "#f0efde"
   image: assets/images/HowPine Logo.png
   android_12:
-    icon_background_color: "#ffffff"
+    icon_background_color: "#f0efde"
     image: assets/images/HowPine Logo.png
 
 # For information on the generic Dart part of this file, see the
@@ -87,11 +87,16 @@ flutter:
     # - assets/models/[Op4]EfficientNetV2B0.tflite
     # - assets/models/[Op6]EfficientNetV2B0.tflite
     # - assets/models/[Op11]EfficientNetV2B0.tflite
-    - assets/models/[Op12]EfficientNetV2B0.tflite
+    # - assets/models/[Op12]EfficientNetV2B0.tflite
+    # - assets/models/[Op17]EfficientNetV2B0.tflite
+    # - assets/models/[Op19]EfficientNetV2B0.tflite
+    # - assets/models/[Op21]EfficientNetV2B0.tflite
     # - assets/models/[Op14]EfficientNetV2B0.tflite
     # - assets/models/[Op4]MobileNetV3Small.tflite
     # - assets/models/[Op15]MobileNetV3Small.tflite
     # - assets/models/[Op16]MobileNetV3Small.tflite
+    # - assets/models/[Op20]MobileNetV3Small_stage2.tflite
+    - assets/models/[reapply]MobileNetV3Small.tflite
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
