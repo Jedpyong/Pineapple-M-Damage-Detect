@@ -10,7 +10,7 @@ class PineappleClassifier {
   Future<void> loadModel() async {
     try {
       _interpreter = await Interpreter.fromAsset(
-        'assets/models/[Op12]EfficientNetV2B0.tflite',
+        'assets/models/[Op21]EfficientNetV2B0.tflite',
       );
       print('Model loaded successfully');
     } catch (e) {
@@ -45,6 +45,8 @@ class PineappleClassifier {
       squareImage,
       width: 300,
       height: 300,
+      // width: 256,  //MobileNet
+      // height: 256, //MobileNet
       // width: 512, //Hi-Res
       // height: 512, //Hi-Res
     );
